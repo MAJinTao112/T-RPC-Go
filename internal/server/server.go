@@ -1,10 +1,10 @@
 package server
 
 import (
-	"T-RPC-Go/internal/codec"
-	"T-RPC-Go/internal/limiter"
-	"T-RPC-Go/internal/protocol"
-	"T-RPC-Go/internal/transport"
+	"github.com/MAJinTao112/T-RPC-Go/internal/codec"
+	"github.com/MAJinTao112/T-RPC-Go/internal/limiter"
+	"github.com/MAJinTao112/T-RPC-Go/internal/protocol"
+	"github.com/MAJinTao112/T-RPC-Go/internal/transport"
 	"log"
 	"net"
 )

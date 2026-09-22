@@ -3,7 +3,7 @@ package protocol
 import (
 	"encoding/binary"
 	"fmt"
-	"T-RPC-Go/internal/codec"
+	"github.com/MAJinTao112/T-RPC-Go/internal/codec"
 )
 
 const Magic uint16 = 0x1234

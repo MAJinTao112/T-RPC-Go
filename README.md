@@ -106,8 +106,33 @@ func (s *Service) Method(req *Request, reply *Response) error
 │   ├── registry       # etcd 注册、发现、缓存与 Watch
 │   ├── server         # TCP Server 与反射 Handler
 │   └── transport      # TCP 连接、连接池与 Future
-└── pkg/api            # 示例请求、响应和业务服务
+├── pkg/api            # 示例请求、响应和业务服务
+└── trpc.go            # 供其他 Go 项目使用的公共 API
 ```
+
+## 作为 Go 库使用
+
+其他项目不需要依赖 `internal` 目录，直接导入模块根包：
+
+```go
+import trpc "github.com/MAJinTao112/T-RPC-Go"
+
+registry, err := trpc.NewRegistry([]string{"127.0.0.1:2379"})
+if err != nil {
+    return err
+}
+defer registry.Close()
+
+client, err := trpc.NewClient(registry, trpc.WithClientTimeout(3*time.Second))
+if err != nil {
+    return err
+}
+defer client.Close()
+
+err = client.Invoke(ctx, "UserService", "GetUserInfo", request, reply)
+```
+
+服务端通过 `trpc.NewServer` 创建，业务方法保持 `func(req *Request, reply *Response) error` 签名。
 
 ## 快速开始
 

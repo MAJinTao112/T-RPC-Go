@@ -1,8 +1,8 @@
 package client
 
 import (
-	"T-RPC-Go/internal/codec"
-	"T-RPC-Go/internal/loadbalance"
+	"github.com/MAJinTao112/T-RPC-Go/internal/codec"
+	"github.com/MAJinTao112/T-RPC-Go/internal/loadbalance"
 	"time"
 )
 

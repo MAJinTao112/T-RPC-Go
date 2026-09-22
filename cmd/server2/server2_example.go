@@ -1,10 +1,10 @@
 package main
 
 import (
-	"T-RPC-Go/internal/codec"
-	"T-RPC-Go/internal/registry"
-	"T-RPC-Go/internal/server"
-	"T-RPC-Go/pkg/api"
+	"github.com/MAJinTao112/T-RPC-Go/internal/codec"
+	"github.com/MAJinTao112/T-RPC-Go/internal/registry"
+	"github.com/MAJinTao112/T-RPC-Go/internal/server"
+	"github.com/MAJinTao112/T-RPC-Go/pkg/api"
 	"log"
 	"os"
 	"os/signal"

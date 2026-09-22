@@ -2,7 +2,7 @@ package transport
 
 import (
 	"errors"
-	"T-RPC-Go/internal/protocol"
+	"github.com/MAJinTao112/T-RPC-Go/internal/protocol"
 	"net"
 	"sync"
 	"sync/atomic"

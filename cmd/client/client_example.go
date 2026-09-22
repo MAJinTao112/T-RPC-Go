@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"T-RPC-Go/internal/client"
-	"T-RPC-Go/internal/codec"
-	"T-RPC-Go/internal/registry"
-	"T-RPC-Go/internal/transport"
-	"T-RPC-Go/pkg/api"
+	"github.com/MAJinTao112/T-RPC-Go/internal/client"
+	"github.com/MAJinTao112/T-RPC-Go/internal/codec"
+	"github.com/MAJinTao112/T-RPC-Go/internal/registry"
+	"github.com/MAJinTao112/T-RPC-Go/internal/transport"
+	"github.com/MAJinTao112/T-RPC-Go/pkg/api"
 	"log"
 	"time"
 )

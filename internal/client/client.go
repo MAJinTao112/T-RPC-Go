@@ -3,13 +3,13 @@ package client
 import (
 	"context"
 	"errors"
-	"T-RPC-Go/internal/breaker"
-	"T-RPC-Go/internal/codec"
-	"T-RPC-Go/internal/limiter"
-	"T-RPC-Go/internal/loadbalance"
-	"T-RPC-Go/internal/protocol"
-	"T-RPC-Go/internal/registry"
-	"T-RPC-Go/internal/transport"
+	"github.com/MAJinTao112/T-RPC-Go/internal/breaker"
+	"github.com/MAJinTao112/T-RPC-Go/internal/codec"
+	"github.com/MAJinTao112/T-RPC-Go/internal/limiter"
+	"github.com/MAJinTao112/T-RPC-Go/internal/loadbalance"
+	"github.com/MAJinTao112/T-RPC-Go/internal/protocol"
+	"github.com/MAJinTao112/T-RPC-Go/internal/registry"
+	"github.com/MAJinTao112/T-RPC-Go/internal/transport"
 	"log"
 	"sync"
 	"time"
@@ -99,13 +99,15 @@ func (c *Client) InvokeAsync(ctx context.Context, service string, method string,
 
 // 同步接口 = 异步 + 等待
 func (c *Client) Invoke(ctx context.Context, service string, method string, args interface{}, reply interface{}) error {
+	callCtx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
 
-	future, err := c.InvokeAsync(ctx, service, method, args)
+	future, err := c.InvokeAsync(callCtx, service, method, args)
 	if err != nil {
 		return err
 	}
 
-	return future.GetResultWithContext(ctx, reply)
+	return future.GetResultWithContext(callCtx, reply)
 }
 
 func (c *Client) getPool(addr string) *transport.ConnectionPool {

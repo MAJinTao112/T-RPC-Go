@@ -1,4 +1,4 @@
-module T-RPC-Go
+module github.com/MAJinTao112/T-RPC-Go
 
 go 1.25.4
 

@@ -2,7 +2,7 @@ package transport
 
 import (
 	"context"
-	"T-RPC-Go/internal/codec"
+	"github.com/MAJinTao112/T-RPC-Go/internal/codec"
 	"sync"
 	"time"
 )

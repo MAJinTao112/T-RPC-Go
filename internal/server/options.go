@@ -1,6 +1,6 @@
 package server
 
-import "T-RPC-Go/internal/codec"
+import "github.com/MAJinTao112/T-RPC-Go/internal/codec"
 
 type HandleOption func(*Handler) error
 

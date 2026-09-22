@@ -1,6 +1,6 @@
 package protocol
 
-import "T-RPC-Go/internal/codec"
+import "github.com/MAJinTao112/T-RPC-Go/internal/codec"
 
 // CodecType 编解码器类型
 type CodecType byte

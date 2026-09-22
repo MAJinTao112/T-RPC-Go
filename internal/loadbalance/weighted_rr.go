@@ -1,7 +1,7 @@
 package loadbalance
 
 import (
-	"T-RPC-Go/internal/registry"
+	"github.com/MAJinTao112/T-RPC-Go/internal/registry"
 	"log"
 	"sync"
 )

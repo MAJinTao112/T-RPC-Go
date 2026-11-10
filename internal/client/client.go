@@ -10,7 +10,6 @@ import (
 	"github.com/MAJinTao112/T-RPC-Go/internal/protocol"
 	"github.com/MAJinTao112/T-RPC-Go/internal/registry"
 	"github.com/MAJinTao112/T-RPC-Go/internal/transport"
-	"log"
 	"sync"
 	"time"
 )
@@ -135,7 +134,6 @@ func (c *Client) getAddr(service string) (string, error) {
 	}
 
 	instance := c.lb.Select(instances)
-	log.Println("选择的地址为:", instance.Addr)
 	return instance.Addr, nil
 }
 

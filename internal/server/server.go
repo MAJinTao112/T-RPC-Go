@@ -1,12 +1,14 @@
 package server
 
 import (
+	"log"
+	"net"
+	"sync"
+
 	"github.com/MAJinTao112/T-RPC-Go/internal/codec"
 	"github.com/MAJinTao112/T-RPC-Go/internal/limiter"
 	"github.com/MAJinTao112/T-RPC-Go/internal/protocol"
 	"github.com/MAJinTao112/T-RPC-Go/internal/transport"
-	"log"
-	"net"
 )
 
 type Server struct {
@@ -17,8 +19,11 @@ type Server struct {
 	handler  *Handler
 	codec    codec.Codec
 
-	conns   map[*transport.TCPConnection]struct{}
-	closing chan struct{}
+	stateMu      sync.Mutex
+	conns        map[*transport.TCPConnection]struct{}
+	closing      chan struct{}
+	shutdownOnce sync.Once
+	handlers     sync.WaitGroup
 }
 
 // 这边用了另外一种go规范去创建对象
@@ -57,7 +62,6 @@ func (s *Server) Register(name string, service interface{}) {
 // todo:后续需要以流的形式去优化
 func (s *Server) Handle(conn *transport.TCPConnection) {
 	defer conn.Close()
-	log.Println("测试一次")
 	for {
 		// 读取请求
 		msg, err := conn.Read()
@@ -88,7 +92,17 @@ func (s *Server) Start() error {
 	if err != nil {
 		return err
 	}
-	s.listener = ln
+
+	s.stateMu.Lock()
+	select {
+	case <-s.closing:
+		s.stateMu.Unlock()
+		_ = ln.Close()
+		return nil
+	default:
+		s.listener = ln
+	}
+	s.stateMu.Unlock()
 
 	for {
 		conn, err := ln.Accept()
@@ -103,32 +117,53 @@ func (s *Server) Start() error {
 
 		tcpConn := transport.NewTCPConnection(conn)
 
+		s.stateMu.Lock()
+		select {
+		case <-s.closing:
+			s.stateMu.Unlock()
+			_ = tcpConn.Close()
+			return nil
+		default:
+		}
 		s.conns[tcpConn] = struct{}{}
+		s.handlers.Add(1)
+		s.stateMu.Unlock()
 
 		go func() {
+			defer s.handlers.Done()
 			s.Handle(tcpConn)
+			s.stateMu.Lock()
 			delete(s.conns, tcpConn)
+			s.stateMu.Unlock()
 		}()
 	}
 
 }
 
 func (s *Server) Close() {
-	if s.listener != nil {
-		s.listener.Close()
-	}
+	s.Shutdown()
 }
 
 func (s *Server) Shutdown() {
-	close(s.closing)
+	s.shutdownOnce.Do(func() {
+		close(s.closing)
 
-	if s.listener != nil {
-		s.listener.Close()
-	}
+		s.stateMu.Lock()
+		listener := s.listener
+		connections := make([]*transport.TCPConnection, 0, len(s.conns))
+		for conn := range s.conns {
+			connections = append(connections, conn)
+		}
+		s.stateMu.Unlock()
 
-	for conn := range s.conns {
-		conn.Close()
-	}
+		if listener != nil {
+			_ = listener.Close()
+		}
+		for _, conn := range connections {
+			_ = conn.Close()
+		}
 
-	log.Println("server shutdown complete")
+		s.handlers.Wait()
+		log.Println("server shutdown complete")
+	})
 }

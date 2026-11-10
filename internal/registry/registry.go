@@ -78,10 +78,10 @@ func (r *Registry) Register(service string, ins Instance, ttl int64) error {
 // Discover：只在第一次调用时建立缓存 + watch
 func (r *Registry) Discover(service string) ([]Instance, error) {
 	r.mu.RLock()
-	if _, ok := r.services[service]; ok {
-		instances := r.copyInstances(service)
+	if instances, ok := r.services[service]; ok {
+		result := copyInstanceMap(instances)
 		r.mu.RUnlock()
-		return instances, nil
+		return result, nil
 	}
 	r.mu.RUnlock()
 
@@ -128,6 +128,12 @@ func (r *Registry) watch(service string) {
 	key := fmt.Sprintf("%s%s/", r.prefix, service)
 
 	for {
+		select {
+		case <-r.ctx.Done():
+			return
+		default:
+		}
+
 		watchChan := r.client.Watch(r.ctx, key, clientv3.WithPrefix())
 
 		for watchResp := range watchChan {
@@ -150,17 +156,24 @@ func (r *Registry) watch(service string) {
 			}
 		}
 
-		// watch 断了，稍后重连
-		time.Sleep(time.Second)
+		// watch 断了，稍后重连；关闭 Registry 时立即退出。
+		select {
+		case <-r.ctx.Done():
+			return
+		case <-time.After(time.Second):
+		}
 	}
 }
 
 func (r *Registry) copyInstances(service string) []Instance {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
+	return copyInstanceMap(r.services[service])
+}
 
-	var instances []Instance
-	for _, ins := range r.services[service] {
+func copyInstanceMap(serviceInstances map[string]Instance) []Instance {
+	instances := make([]Instance, 0, len(serviceInstances))
+	for _, ins := range serviceInstances {
 		instances = append(instances, ins)
 	}
 	return instances
